@@ -1,1 +1,18 @@
+# Archivos de entorno con credenciales
 .env
+.env.local
+
+# Artefactos de compilación de Go
+/bin/
+/tmp/
+*.exe
+*.test
+*.out
+
+# Editor / sistema operativo
+.idea/
+.vscode/
+.DS_Store
+
+# Volumen local de uploads (solo aplica al correr fuera de Docker)
+/uploads/
