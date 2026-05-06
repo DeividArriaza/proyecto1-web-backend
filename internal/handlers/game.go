@@ -16,25 +16,25 @@ import (
 	"github.com/dsalas/games-tracker-backend/internal/store"
 )
 
-// SeriesHandler agrupa los endpoints de /series. La inyección por struct
+// GameHandler agrupa los endpoints de /games. La inyección por struct
 // hace fácil pasar dependencias adicionales (logger, etc.) más adelante.
-type SeriesHandler struct {
-	Store *store.SeriesStore
+type GameHandler struct {
+	Store *store.GameStore
 }
 
 // Routes monta los endpoints CRUD bajo el router que recibe.
-func (h *SeriesHandler) Routes(r chi.Router) {
-	r.Get("/series", h.List)
-	r.Post("/series", h.Create)
-	r.Get("/series/{id}", h.Get)
-	r.Put("/series/{id}", h.Update)
-	r.Delete("/series/{id}", h.Delete)
+func (h *GameHandler) Routes(r chi.Router) {
+	r.Get("/games", h.List)
+	r.Post("/games", h.Create)
+	r.Get("/games/{id}", h.Get)
+	r.Put("/games/{id}", h.Update)
+	r.Delete("/games/{id}", h.Delete)
 }
 
 // listResponse es la forma del payload paginado descrita en el CLAUDE.md.
 type listResponse struct {
-	Data []models.Series `json:"data"`
-	Meta listMeta        `json:"meta"`
+	Data []models.Game `json:"data"`
+	Meta listMeta      `json:"meta"`
 }
 
 type listMeta struct {
@@ -44,7 +44,7 @@ type listMeta struct {
 	TotalPages int `json:"total_pages"`
 }
 
-func (h *SeriesHandler) List(w http.ResponseWriter, r *http.Request) {
+func (h *GameHandler) List(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	page, err := parsePositiveInt(q.Get("page"), 1)
@@ -82,7 +82,7 @@ func (h *SeriesHandler) List(w http.ResponseWriter, r *http.Request) {
 		Limit: limit,
 	})
 	if err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "failed to list series", "")
+		httpx.Error(w, http.StatusInternalServerError, "failed to list games", "")
 		return
 	}
 
@@ -97,24 +97,24 @@ func (h *SeriesHandler) List(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *SeriesHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *GameHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseID(w, r)
 	if !ok {
 		return
 	}
-	s, err := h.Store.GetByID(r.Context(), id)
+	g, err := h.Store.GetByID(r.Context(), id)
 	if errors.Is(err, store.ErrNotFound) {
-		httpx.Error(w, http.StatusNotFound, "series not found", "")
+		httpx.Error(w, http.StatusNotFound, "game not found", "")
 		return
 	}
 	if err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "failed to get series", "")
+		httpx.Error(w, http.StatusInternalServerError, "failed to get game", "")
 		return
 	}
-	httpx.JSON(w, http.StatusOK, s)
+	httpx.JSON(w, http.StatusOK, g)
 }
 
-func (h *SeriesHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *GameHandler) Create(w http.ResponseWriter, r *http.Request) {
 	in, ok := decodeInput(w, r)
 	if !ok {
 		return
@@ -124,15 +124,15 @@ func (h *SeriesHandler) Create(w http.ResponseWriter, r *http.Request) {
 		httpx.Errors(w, http.StatusBadRequest, errs)
 		return
 	}
-	s, err := h.Store.Insert(r.Context(), in)
+	g, err := h.Store.Insert(r.Context(), in)
 	if err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "failed to create series", "")
+		httpx.Error(w, http.StatusInternalServerError, "failed to create game", "")
 		return
 	}
-	httpx.JSON(w, http.StatusCreated, s)
+	httpx.JSON(w, http.StatusCreated, g)
 }
 
-func (h *SeriesHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *GameHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseID(w, r)
 	if !ok {
 		return
@@ -146,29 +146,29 @@ func (h *SeriesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.Errors(w, http.StatusBadRequest, errs)
 		return
 	}
-	s, err := h.Store.Update(r.Context(), id, in)
+	g, err := h.Store.Update(r.Context(), id, in)
 	if errors.Is(err, store.ErrNotFound) {
-		httpx.Error(w, http.StatusNotFound, "series not found", "")
+		httpx.Error(w, http.StatusNotFound, "game not found", "")
 		return
 	}
 	if err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "failed to update series", "")
+		httpx.Error(w, http.StatusInternalServerError, "failed to update game", "")
 		return
 	}
-	httpx.JSON(w, http.StatusOK, s)
+	httpx.JSON(w, http.StatusOK, g)
 }
 
-func (h *SeriesHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *GameHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseID(w, r)
 	if !ok {
 		return
 	}
 	if err := h.Store.Delete(r.Context(), id); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			httpx.Error(w, http.StatusNotFound, "series not found", "")
+			httpx.Error(w, http.StatusNotFound, "game not found", "")
 			return
 		}
-		httpx.Error(w, http.StatusInternalServerError, "failed to delete series", "")
+		httpx.Error(w, http.StatusInternalServerError, "failed to delete game", "")
 		return
 	}
 	httpx.NoContent(w)
@@ -199,8 +199,8 @@ func parsePositiveInt(raw string, fallback int) (int, error) {
 	return n, nil
 }
 
-func decodeInput(w http.ResponseWriter, r *http.Request) (models.SeriesInput, bool) {
-	var in models.SeriesInput
+func decodeInput(w http.ResponseWriter, r *http.Request) (models.GameInput, bool) {
+	var in models.GameInput
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&in); err != nil {
@@ -211,8 +211,10 @@ func decodeInput(w http.ResponseWriter, r *http.Request) (models.SeriesInput, bo
 }
 
 // validateInput agrupa todos los errores antes de devolverlos para que el
-// cliente reciba la lista completa en una sola respuesta.
-func validateInput(in models.SeriesInput, requireAll bool) []httpx.FieldError {
+// cliente reciba la lista completa en una sola respuesta. En juegos
+// no se valida `hours_played <= total_hours` porque pasarse del estimado
+// es algo común (side quests, replay, etc.).
+func validateInput(in models.GameInput, requireAll bool) []httpx.FieldError {
 	var errs []httpx.FieldError
 
 	if requireAll || in.Title != nil {
@@ -237,7 +239,7 @@ func validateInput(in models.SeriesInput, requireAll bool) []httpx.FieldError {
 		} else if !models.IsValidStatus(status) {
 			errs = append(errs, httpx.FieldError{
 				Field: "status",
-				Error: "status must be one of: watching, completed, dropped, pending",
+				Error: "status must be one of: playing, beaten, dropped, backlog",
 			})
 		}
 	}
@@ -246,18 +248,11 @@ func validateInput(in models.SeriesInput, requireAll bool) []httpx.FieldError {
 		errs = append(errs, httpx.FieldError{Field: "genre", Error: "genre must be at most 100 characters"})
 	}
 
-	if in.EpisodesWatched != nil && *in.EpisodesWatched < 0 {
-		errs = append(errs, httpx.FieldError{Field: "episodes_watched", Error: "episodes_watched must be >= 0"})
+	if in.HoursPlayed != nil && *in.HoursPlayed < 0 {
+		errs = append(errs, httpx.FieldError{Field: "hours_played", Error: "hours_played must be >= 0"})
 	}
-	if in.TotalEpisodes != nil && *in.TotalEpisodes < 0 {
-		errs = append(errs, httpx.FieldError{Field: "total_episodes", Error: "total_episodes must be >= 0"})
-	}
-	if in.EpisodesWatched != nil && in.TotalEpisodes != nil &&
-		*in.TotalEpisodes > 0 && *in.EpisodesWatched > *in.TotalEpisodes {
-		errs = append(errs, httpx.FieldError{
-			Field: "episodes_watched",
-			Error: "episodes_watched cannot exceed total_episodes",
-		})
+	if in.TotalHours != nil && *in.TotalHours < 0 {
+		errs = append(errs, httpx.FieldError{Field: "total_hours", Error: "total_hours must be >= 0"})
 	}
 	return errs
 }

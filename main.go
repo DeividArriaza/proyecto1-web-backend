@@ -38,8 +38,8 @@ func main() {
 	defer pool.Close()
 	log.Println("connected to postgres")
 
-	seriesStore := appstore.NewSeriesStore(pool)
-	seriesHandler := &apph.SeriesHandler{Store: seriesStore}
+	gameStore := appstore.NewGameStore(pool)
+	gameHandler := &apph.GameHandler{Store: gameStore}
 
 	r := chi.NewRouter()
 	r.Use(appmw.CORS)
@@ -49,7 +49,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	seriesHandler.Routes(r)
+	gameHandler.Routes(r)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
