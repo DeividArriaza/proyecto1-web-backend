@@ -2,7 +2,7 @@
 
 API REST en Go que persiste series y ratings en PostgreSQL. Sirve también la documentación interactiva (Swagger UI) y los archivos de imagen subidos por los usuarios.
 
-El cliente vive en otro repo: [`series-tracker-frontend`](../series-tracker-frontend) (debe clonarse al lado de este repo, ver más abajo).
+El cliente vive en otro repo: [`games-tracker-frontend`](../games-tracker-frontend) (debe clonarse al lado de este repo, ver más abajo).
 
 ---
 
@@ -30,16 +30,16 @@ El `docker-compose.yml` vive en este repo y orquesta los **tres** servicios. El 
 
 ```text
 mi-carpeta/
-├── series-tracker-backend/      ← este repo
-└── series-tracker-frontend/     ← repo del cliente
+├── games-tracker-backend/      ← este repo
+└── games-tracker-frontend/     ← repo del cliente
 ```
 
 ### 1. Clonar ambos repos al mismo nivel
 
 ```bash
-git clone https://github.com/<usuario>/series-tracker-backend.git
-git clone https://github.com/<usuario>/series-tracker-frontend.git
-cd series-tracker-backend
+git clone https://github.com/<usuario>/games-tracker-backend.git
+git clone https://github.com/<usuario>/games-tracker-frontend.git
+cd games-tracker-backend
 ```
 
 ### 2. Configurar variables de entorno
@@ -143,4 +143,4 @@ Access-Control-Allow-Headers: Content-Type
 
 ## Repositorios relacionados
 
-- Frontend: [series-tracker-frontend](../series-tracker-frontend)
+- Frontend: [games-tracker-frontend](../games-tracker-frontend)

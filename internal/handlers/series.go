@@ -11,9 +11,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/dsalas/series-tracker-backend/internal/httpx"
-	"github.com/dsalas/series-tracker-backend/internal/models"
-	"github.com/dsalas/series-tracker-backend/internal/store"
+	"github.com/dsalas/games-tracker-backend/internal/httpx"
+	"github.com/dsalas/games-tracker-backend/internal/models"
+	"github.com/dsalas/games-tracker-backend/internal/store"
 )
 
 // SeriesHandler agrupa los endpoints de /series. La inyección por struct

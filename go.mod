@@ -1,4 +1,4 @@
-module github.com/dsalas/series-tracker-backend
+module github.com/dsalas/games-tracker-backend
 
 go 1.22
 

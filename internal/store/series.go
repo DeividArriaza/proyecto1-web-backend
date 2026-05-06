@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/dsalas/series-tracker-backend/internal/models"
+	"github.com/dsalas/games-tracker-backend/internal/models"
 )
 
 // ErrNotFound se devuelve cuando una operación apuntaba a un id que no existe.

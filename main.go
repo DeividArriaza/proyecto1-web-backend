@@ -12,10 +12,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	appdb "github.com/dsalas/series-tracker-backend/internal/db"
-	apph "github.com/dsalas/series-tracker-backend/internal/handlers"
-	appmw "github.com/dsalas/series-tracker-backend/internal/middleware"
-	appstore "github.com/dsalas/series-tracker-backend/internal/store"
+	appdb "github.com/dsalas/games-tracker-backend/internal/db"
+	apph "github.com/dsalas/games-tracker-backend/internal/handlers"
+	appmw "github.com/dsalas/games-tracker-backend/internal/middleware"
+	appstore "github.com/dsalas/games-tracker-backend/internal/store"
 )
 
 func main() {

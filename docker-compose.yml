@@ -1,11 +1,11 @@
 # docker-compose para el stack completo de Series Tracker.
 # Vive en el repo del backend. El servicio `frontend` apunta al repo hermano
-# `../series-tracker-frontend`, que debe estar clonado al mismo nivel.
+# `../games-tracker-frontend`, que debe estar clonado al mismo nivel.
 
 services:
   db:
     image: postgres:16-alpine
-    container_name: series-tracker-db
+    container_name: games-tracker-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: series-tracker-api
+    container_name: games-tracker-api
     restart: unless-stopped
     depends_on:
       db:
@@ -45,9 +45,9 @@ services:
   frontend:
     build:
       # El contexto apunta al repo hermano del frontend.
-      context: ../series-tracker-frontend
+      context: ../games-tracker-frontend
       dockerfile: Dockerfile
-    container_name: series-tracker-frontend
+    container_name: games-tracker-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_HOST_PORT:-4567}:80"
