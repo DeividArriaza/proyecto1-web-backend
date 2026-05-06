@@ -27,6 +27,10 @@ func main() {
 	if port == "" {
 		port = "8787"
 	}
+	uploadsDir := os.Getenv("UPLOADS_DIR")
+	if uploadsDir == "" {
+		uploadsDir = "/app/uploads"
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -44,6 +48,8 @@ func main() {
 	ratingStore := appstore.NewRatingStore(pool)
 	ratingHandler := &apph.RatingHandler{Store: ratingStore}
 
+	imageHandler := &apph.ImageHandler{Store: gameStore, UploadsDir: uploadsDir}
+
 	r := chi.NewRouter()
 	r.Use(appmw.CORS)
 
@@ -54,6 +60,13 @@ func main() {
 
 	gameHandler.Routes(r)
 	ratingHandler.Routes(r)
+	imageHandler.Routes(r)
+
+	// Servimos las imágenes subidas como archivos estáticos. La carpeta vive
+	// en un volumen Docker para que sobreviva a recreaciones del contenedor.
+	uploadsFS := http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir)))
+	r.Handle("/uploads/*", uploadsFS)
+
 	docsRoutes(r)
 
 	srv := &http.Server{
