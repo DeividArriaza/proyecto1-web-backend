@@ -1,6 +1,6 @@
-# Series Tracker — Backend
+# Games Tracker — Backend
 
-API REST en Go que persiste series y ratings en PostgreSQL. Sirve también la documentación interactiva (Swagger UI) y los archivos de imagen subidos por los usuarios.
+API REST en Go que persiste videojuegos y ratings en PostgreSQL. Sirve también la documentación interactiva (Swagger UI) y los archivos de imagen subidos por los usuarios.
 
 El cliente vive en otro repo: [`games-tracker-frontend`](../games-tracker-frontend) (debe clonarse al lado de este repo, ver más abajo).
 
@@ -89,7 +89,7 @@ docker compose down -v        # …además borra la base de datos y los uploads
 .
 ├── Dockerfile              # Imagen multi-stage del backend
 ├── docker-compose.yml      # Orquesta db + api + frontend
-├── db/init.sql             # Esquema inicial (series, ratings)
+├── db/init.sql             # Esquema inicial (games, ratings)
 ├── go.mod / go.sum         # Dependencias de Go
 ├── main.go                 # Entry point del servidor HTTP
 ├── internal/
@@ -106,14 +106,14 @@ docker compose down -v        # …además borra la base de datos y los uploads
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/healthz` | Healthcheck simple |
-| `GET` | `/series` | Listar series con `?q=`, `?sort=`, `?order=`, `?page=`, `?limit=` |
-| `GET` | `/series/{id}` | Obtener una serie |
-| `POST` | `/series` | Crear serie |
-| `PUT` | `/series/{id}` | Editar serie |
-| `DELETE` | `/series/{id}` | Eliminar serie |
-| `POST` | `/series/{id}/image` | Subir portada (`multipart/form-data`, ≤ 1 MB) |
-| `GET` | `/series/{id}/rating` | Obtener promedio + conteo |
-| `POST` | `/series/{id}/rating` | Registrar voto (1 a 10) |
+| `GET` | `/games` | Listar juegos con `?q=`, `?sort=`, `?order=`, `?page=`, `?limit=` |
+| `GET` | `/games/{id}` | Obtener un juego |
+| `POST` | `/games` | Crear juego |
+| `PUT` | `/games/{id}` | Editar juego |
+| `DELETE` | `/games/{id}` | Eliminar juego |
+| `POST` | `/games/{id}/image` | Subir portada (`multipart/form-data`, ≤ 1 MB) |
+| `GET` | `/games/{id}/rating` | Obtener promedio + conteo |
+| `POST` | `/games/{id}/rating` | Registrar voto (1 a 10) |
 | `GET` | `/swagger/` | UI interactiva |
 | `GET` | `/openapi.yaml` | Spec en YAML |
 
