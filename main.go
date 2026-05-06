@@ -13,7 +13,9 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	appdb "github.com/dsalas/series-tracker-backend/internal/db"
+	apph "github.com/dsalas/series-tracker-backend/internal/handlers"
 	appmw "github.com/dsalas/series-tracker-backend/internal/middleware"
+	appstore "github.com/dsalas/series-tracker-backend/internal/store"
 )
 
 func main() {
@@ -36,6 +38,9 @@ func main() {
 	defer pool.Close()
 	log.Println("connected to postgres")
 
+	seriesStore := appstore.NewSeriesStore(pool)
+	seriesHandler := &apph.SeriesHandler{Store: seriesStore}
+
 	r := chi.NewRouter()
 	r.Use(appmw.CORS)
 
@@ -43,6 +48,8 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
+
+	seriesHandler.Routes(r)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
