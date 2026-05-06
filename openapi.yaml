@@ -1,0 +1,517 @@
+# Spec OpenAPI 3.0 escrita a mano. Es el contrato canónico de la API y
+# se sirve sin transformaciones desde GET /openapi.yaml. La UI interactiva
+# vive en GET /swagger/ y consume este mismo archivo.
+openapi: 3.0.3
+
+info:
+  title: Games Tracker API
+  description: |
+    API REST para llevar registro personal de videojuegos.
+    Cada juego tiene un status (`playing`, `beaten`, `dropped`, `backlog`),
+    horas jugadas opcionales, una imagen de portada y un sistema de ratings
+    anónimos del 1 al 10. La API no genera HTML — es solo JSON.
+  version: 1.0.0
+  contact:
+    name: Series Tracker Lab — Diseño Web
+
+servers:
+  - url: http://localhost:8787
+    description: Desarrollo local (docker-compose)
+
+tags:
+  - name: games
+    description: CRUD de juegos
+  - name: images
+    description: Subida de portadas
+  - name: ratings
+    description: Votos anónimos del 1 al 10
+  - name: meta
+    description: Healthcheck y documentación
+
+paths:
+
+  # --- Healthcheck ---
+  /healthz:
+    get:
+      tags: [meta]
+      summary: Healthcheck simple
+      responses:
+        "200":
+          description: La API está arriba
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # --- Spec en crudo ---
+  /openapi.yaml:
+    get:
+      tags: [meta]
+      summary: Devuelve este mismo archivo en formato YAML
+      responses:
+        "200":
+          description: Contenido YAML del spec
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  # --- Listado y creación de juegos ---
+  /games:
+    get:
+      tags: [games]
+      summary: Listar juegos
+      description: |
+        Acepta búsqueda parcial por título, ordenamiento y paginación.
+        Todos los parámetros son opcionales y combinables.
+      parameters:
+        - $ref: "#/components/parameters/QueryQ"
+        - $ref: "#/components/parameters/QuerySort"
+        - $ref: "#/components/parameters/QueryOrder"
+        - $ref: "#/components/parameters/QueryPage"
+        - $ref: "#/components/parameters/QueryLimit"
+      responses:
+        "200":
+          description: Lista paginada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [games]
+      summary: Crear un juego
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameInput"
+            examples:
+              minimo:
+                summary: Mínimo válido (solo title y status)
+                value:
+                  title: Hollow Knight
+                  status: playing
+              completo:
+                summary: Con todos los campos
+                value:
+                  title: The Witcher 3
+                  genre: RPG
+                  status: beaten
+                  hours_played: 120
+                  total_hours: 100
+      responses:
+        "201":
+          description: Juego creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # --- Operaciones por id ---
+  /games/{id}:
+    parameters:
+      - $ref: "#/components/parameters/PathID"
+    get:
+      tags: [games]
+      summary: Obtener un juego por id
+      responses:
+        "200":
+          description: El juego solicitado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    put:
+      tags: [games]
+      summary: Reemplazar un juego existente
+      description: PUT con semántica de reemplazo total — title y status son obligatorios.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameInput"
+      responses:
+        "200":
+          description: Juego actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags: [games]
+      summary: Eliminar un juego
+      responses:
+        "204":
+          description: Eliminado correctamente (sin body)
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # --- Subida de imagen ---
+  /games/{id}/image:
+    parameters:
+      - $ref: "#/components/parameters/PathID"
+    post:
+      tags: [images]
+      summary: Subir o reemplazar la portada del juego
+      description: |
+        Recibe un archivo `image` en `multipart/form-data` (máx. 1 MB,
+        tipos permitidos: jpg, jpeg, png, webp). Si el juego ya tenía
+        una portada, el archivo anterior se borra del disco.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Imagen guardada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_path:
+                    type: string
+                    example: /uploads/1_cover.jpg
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # --- Ratings ---
+  /games/{id}/rating:
+    parameters:
+      - $ref: "#/components/parameters/PathID"
+    get:
+      tags: [ratings]
+      summary: Obtener rating promedio y conteo de votos
+      responses:
+        "200":
+          description: Promedio y total de votos del juego
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [ratings]
+      summary: Registrar un voto anónimo (1 a 10)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RatingInput"
+      responses:
+        "201":
+          description: Voto registrado y resumen actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+
+  parameters:
+    PathID:
+      name: id
+      in: path
+      required: true
+      description: ID numérico del juego
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+    QueryQ:
+      name: q
+      in: query
+      description: Búsqueda parcial por título (ILIKE)
+      required: false
+      schema:
+        type: string
+      example: zelda
+
+    QuerySort:
+      name: sort
+      in: query
+      description: Campo por el que ordenar
+      required: false
+      schema:
+        type: string
+        enum: [title, created_at, status]
+
+    QueryOrder:
+      name: order
+      in: query
+      description: Dirección del orden
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+
+    QueryPage:
+      name: page
+      in: query
+      description: Página actual (1-indexed)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    QueryLimit:
+      name: limit
+      in: query
+      description: Resultados por página (máx. 100)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+
+    Game:
+      type: object
+      required: [id, title, status, hours_played, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          maxLength: 255
+          example: The Witcher 3
+        genre:
+          type: string
+          nullable: true
+          maxLength: 100
+          example: RPG
+        status:
+          type: string
+          enum: [playing, beaten, dropped, backlog]
+          example: beaten
+        hours_played:
+          type: integer
+          minimum: 0
+          example: 120
+        total_hours:
+          type: integer
+          nullable: true
+          minimum: 0
+          example: 100
+        image_path:
+          type: string
+          nullable: true
+          example: /uploads/1_cover.jpg
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GameInput:
+      type: object
+      required: [title, status]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          example: Hollow Knight
+        genre:
+          type: string
+          nullable: true
+          maxLength: 100
+          example: Metroidvania
+        status:
+          type: string
+          enum: [playing, beaten, dropped, backlog]
+          example: playing
+        hours_played:
+          type: integer
+          minimum: 0
+          default: 0
+        total_hours:
+          type: integer
+          nullable: true
+          minimum: 0
+
+    ListMeta:
+      type: object
+      required: [page, limit, total, total_pages]
+      properties:
+        page:
+          type: integer
+          example: 2
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 47
+        total_pages:
+          type: integer
+          example: 5
+
+    GameListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Game"
+        meta:
+          $ref: "#/components/schemas/ListMeta"
+
+    RatingInput:
+      type: object
+      required: [score]
+      properties:
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 8
+
+    RatingSummary:
+      type: object
+      required: [average, count]
+      properties:
+        average:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          example: 8.4
+        count:
+          type: integer
+          minimum: 0
+          example: 12
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: title is required
+        field:
+          type: string
+          example: title
+
+    FieldError:
+      type: object
+      required: [field, error]
+      properties:
+        field:
+          type: string
+          example: status
+        error:
+          type: string
+          example: "status must be one of: playing, beaten, dropped, backlog"
+
+    ErrorList:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldError"
+
+  responses:
+
+    BadRequest:
+      description: Input inválido o faltante
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Error"
+              - $ref: "#/components/schemas/ErrorList"
+          examples:
+            uno:
+              summary: Un solo error
+              value:
+                error: id must be a positive integer
+                field: id
+            varios:
+              summary: Varios errores de validación
+              value:
+                errors:
+                  - field: title
+                    error: title is required
+                  - field: status
+                    error: "status must be one of: playing, beaten, dropped, backlog"
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: game not found
+
+    InternalError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: failed to list games
