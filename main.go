@@ -41,6 +41,9 @@ func main() {
 	gameStore := appstore.NewGameStore(pool)
 	gameHandler := &apph.GameHandler{Store: gameStore}
 
+	ratingStore := appstore.NewRatingStore(pool)
+	ratingHandler := &apph.RatingHandler{Store: ratingStore}
+
 	r := chi.NewRouter()
 	r.Use(appmw.CORS)
 
@@ -50,6 +53,7 @@ func main() {
 	})
 
 	gameHandler.Routes(r)
+	ratingHandler.Routes(r)
 	docsRoutes(r)
 
 	srv := &http.Server{
