@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Games Tracker — API Docs</title>
+    <link rel="stylesheet" href="swagger-ui.css" />
+    <style>
+      body { margin: 0; }
+      /* Toque mínimo de marca rosa en la barra superior. */
+      .topbar { background: #ffe4ee; }
+      .topbar .download-url-wrapper { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+
+    <!-- Bundles servidos desde el propio backend (embebidos en el binario Go). -->
+    <script src="swagger-ui-bundle.js"></script>
+    <script src="swagger-ui-standalone-preset.js"></script>
+    <script>
+      // La spec se sirve desde la raíz del backend, no desde /swagger/.
+      window.ui = SwaggerUIBundle({
+        url: "/openapi.yaml",
+        dom_id: "#swagger-ui",
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset.slice(1),
+        ],
+        layout: "StandaloneLayout",
+        deepLinking: true,
+        defaultModelsExpandDepth: 1,
+        tryItOutEnabled: true,
+      });
+    </script>
+  </body>
+</html>

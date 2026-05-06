@@ -50,6 +50,7 @@ func main() {
 	})
 
 	gameHandler.Routes(r)
+	docsRoutes(r)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
