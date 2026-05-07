@@ -4,6 +4,8 @@ API REST en Go que persiste videojuegos y ratings en PostgreSQL. Sirve también 
 
 El cliente vive en otro repo: [`proyecto1-web-frontend`](../proyecto1-web-frontend) (debe clonarse al lado de este repo, ver más abajo).
 
+> 🌐 **Demo público:** [http://www.servigtdev.com:4567/](http://www.servigtdev.com:4567/)
+
 ---
 
 ## Stack
