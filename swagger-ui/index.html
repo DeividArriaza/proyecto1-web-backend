@@ -7,9 +7,18 @@
     <link rel="stylesheet" href="swagger-ui.css" />
     <style>
       body { margin: 0; }
-      /* Toque mínimo de marca rosa en la barra superior. */
-      .topbar { background: #ffe4ee; }
+      /* Topbar con la paleta dark/neón de la app principal. */
+      .topbar {
+        background: linear-gradient(90deg, #0b0d17, #1c2138);
+        border-bottom: 1px solid #2e3553;
+        box-shadow: 0 0 18px rgba(124, 58, 237, 0.2);
+      }
       .topbar .download-url-wrapper { display: none; }
+      .topbar .topbar-wrapper a span {
+        color: #a855f7 !important;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
     </style>
   </head>
   <body>
