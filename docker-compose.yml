@@ -1,6 +1,6 @@
 # docker-compose para el stack completo de Games Tracker.
 # Vive en el repo del backend. El servicio `frontend` apunta al repo hermano
-# `../games-tracker-frontend`, que debe estar clonado al mismo nivel.
+# `../proyecto1-web-frontend`, que debe estar clonado al mismo nivel.
 
 services:
   db:
@@ -48,7 +48,9 @@ services:
   frontend:
     build:
       # El contexto apunta al repo hermano del frontend.
-      context: ../games-tracker-frontend
+      # Si tu carpeta del frontend tiene otro nombre, definí FRONTEND_PATH
+      # en el `.env` (por ejemplo: FRONTEND_PATH=../mi-frontend).
+      context: ${FRONTEND_PATH:-../proyecto1-web-frontend}
       dockerfile: Dockerfile
     container_name: games-tracker-frontend
     restart: unless-stopped

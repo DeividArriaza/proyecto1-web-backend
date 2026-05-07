@@ -2,7 +2,7 @@
 
 API REST en Go que persiste videojuegos y ratings en PostgreSQL. Sirve también la documentación interactiva (Swagger UI) y los archivos de imagen subidos por los usuarios.
 
-El cliente vive en otro repo: [`games-tracker-frontend`](../games-tracker-frontend) (debe clonarse al lado de este repo, ver más abajo).
+El cliente vive en otro repo: [`proyecto1-web-frontend`](../proyecto1-web-frontend) (debe clonarse al lado de este repo, ver más abajo).
 
 ---
 
@@ -30,17 +30,19 @@ El `docker-compose.yml` vive en este repo y orquesta los **tres** servicios. El 
 
 ```text
 mi-carpeta/
-├── games-tracker-backend/      ← este repo
-└── games-tracker-frontend/     ← repo del cliente
+├── proyecto1-web-backend/      ← este repo
+└── proyecto1-web-frontend/     ← repo del cliente
 ```
 
 ### 1. Clonar ambos repos al mismo nivel
 
 ```bash
-git clone https://github.com/<usuario>/games-tracker-backend.git
-git clone https://github.com/<usuario>/games-tracker-frontend.git
-cd games-tracker-backend
+git clone https://github.com/DeividArriaza/proyecto1-web-backend.git
+git clone https://github.com/DeividArriaza/proyecto1-web-frontend.git
+cd proyecto1-web-backend
 ```
+
+> Si renombraste la carpeta del frontend, definí `FRONTEND_PATH` en el `.env` con la ruta correcta.
 
 ### 2. Configurar variables de entorno
 
