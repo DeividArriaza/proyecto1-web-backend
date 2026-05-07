@@ -23,7 +23,14 @@ WORKDIR /app
 COPY --from=build /out/api /app/api
 
 # Carpeta de uploads (se monta como volumen desde docker-compose para persistir)
-RUN mkdir -p /app/uploads && chown -R app:app /app
+RUN mkdir -p /app/uploads
+
+# Portadas de demo: el binario las copia al volumen /app/uploads la primera
+# vez que arranca contra un volumen vacío, para que los image_path del seed
+# SQL queden servibles desde el primer momento.
+COPY seed-covers /app/seed-covers
+
+RUN chown -R app:app /app
 
 USER app
 
