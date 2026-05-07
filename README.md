@@ -143,4 +143,4 @@ Access-Control-Allow-Headers: Content-Type
 
 ## Repositorios relacionados
 
-- Frontend: [games-tracker-frontend](../games-tracker-frontend)
+- Frontend: https://github.com/DeividArriaza/proyecto1-web-frontend/blob/main/README.md
